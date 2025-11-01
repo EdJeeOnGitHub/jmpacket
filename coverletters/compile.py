@@ -30,11 +30,13 @@ for index, job in jobstodo.iterrows():
     pdf_filename = pdf_filestub + '.pdf'
     subprocess.run(['pdflatex', '-interaction=nonstopmode', pdf_jobname, tex_filename])
     # move file from coverletters/build to coverletters/
-    subprocess.run(['mv', "build/coverletter.pdf", '../' + pdf_filename])
 
     # check if PDF is successfully generated
     if not os.path.exists(pdf_filename):
         raise RuntimeError('PDF output not found: ' + pdf_filename)
+
+    
+    subprocess.run(['mv', pdf_filename, "../coverletter-output/" + pdf_filename])
 
 #%% delete any auxiliary files
 types = ['*.aux', '*.bbl', '*.blg', '*.idx', '*.ind', '*.lof', '*.lot', '*.out',
