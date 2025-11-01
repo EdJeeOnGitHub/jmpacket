@@ -9,11 +9,10 @@ filename, ext = os.path.splitext(tex_filename)
 # %% read in jobs.csv
 jobs     = pd.read_csv('jobs.csv', delimiter='|', keep_default_na=False)
 jobstodo = jobs[jobs['uploaded']==False]
+
 # %% compile coverletter for each job
 for index, job in jobstodo.iterrows():
-
     uniqueID = job['uniqueID']
-
     # write custom commands to currentjob.tex (overwriting previous version)
     f = open("currentjob.tex", "w")
     f.write("\\newcommand{\\salutation}{%s}\n" % job['salutation'])
@@ -30,15 +29,18 @@ for index, job in jobstodo.iterrows():
     pdf_jobname  = '-jobname=' + pdf_filestub
     pdf_filename = pdf_filestub + '.pdf'
     subprocess.run(['pdflatex', '-interaction=nonstopmode', pdf_jobname, tex_filename])
+    # move file from coverletters/build to coverletters/
+    subprocess.run(['mv', "build/coverletter.pdf", '../' + pdf_filename])
 
     # check if PDF is successfully generated
     if not os.path.exists(pdf_filename):
-        raise RuntimeError('PDF output not found')
+        raise RuntimeError('PDF output not found: ' + pdf_filename)
 
 #%% delete any auxiliary files
 types = ['*.aux', '*.bbl', '*.blg', '*.idx', '*.ind', '*.lof', '*.lot', '*.out',
          '*.toc', '*.acn', '*.acr', '*.alg', '*.glg', '*.glo', '*.gls', '*.fls',
          '*.log', '*.fdb_latexmk', '*.snm', '*.synctex(busy)', '*.synctex.gz*',
          '*.nav']
+[os.remove(f) for t in types for f in glob.glob(os.path.join('build', t))]
 [os.remove(f) for t in types for f in glob.glob(t)]
-os.remove('currentjob.tex')
+os.remove(os.path.join('currentjob.tex'))
